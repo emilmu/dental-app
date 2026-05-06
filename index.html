@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>לומינה - חיוך מושלם</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            background-color: #F8FAFC; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* Mobile height fix */
+        .min-h-screen-ios { min-height: -webkit-fill-available; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        const DENTISTS = [
+            { id: 'd1', name: 'ד"ר שרה וילסון', role: 'מנתחת בכירה', photo: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200&h=260' },
+            { id: 'd2', name: 'ד"ר יעקב מילר', role: 'אורתודונטיה', photo: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200&h=260' },
+            { id: 'd3', name: 'ד"ר אלנה רודריגז', role: 'רפואת ילדים', photo: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200&h=260' },
+        ];
+
+        const TREATMENTS = [
+            { id: 't1', name: 'ניקוי עמוק', type: 'מניעתי', duration: 45, price: '₪450', color: 'bg-cyan-500' },
+            { id: 't2', name: 'שחזור חרסינה', type: 'משקם', duration: 60, price: '₪1,200', color: 'bg-purple-500' },
+            { id: 't3', name: 'עזרה ראשונה', type: 'חירום', duration: 30, price: '₪350', color: 'bg-rose-500' },
+            { id: 't4', name: 'הלבנת שיניים', type: 'אסתטי', duration: 90, price: '₪1,800', color: 'bg-amber-500' },
+        ];
+
+        const TIME_SLOTS = ["08:00", "09:30", "11:00", "13:30", "15:00", "16:30"];
+
+        function App() {
+            const [view, setView] = useState('landing');
+            const [userType, setUserType] = useState(null);
+            const [step, setStep] = useState(1);
+            const [booking, setBooking] = useState({
+                dentist: null, treatment: null, date: new Date().toISOString().split('T')[0], time: null, patientName: '', patientPhone: ''
+            });
+            const [appointments, setAppointments] = useState([
+                { id: 1, patientName: "ישראל ישראלי", dentistId: "d1", treatmentId: "t1", date: new Date().toISOString().split('T')[0], time: "08:00" }
+            ]);
+
+            const reset = () => {
+                setView('landing');
+                setUserType(null);
+                setStep(1);
+                setBooking({ dentist: null, treatment: null, date: new Date().toISOString().split('T')[0], time: null, patientName: '', patientPhone: '' });
+            };
+
+            const handleComplete = () => {
+                setAppointments([...appointments, { ...booking, id: Date.now() }]);
+                setStep(5);
+            };
+
+            useEffect(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }, [view, step]);
+
+            return (
+                <div className="min-h-screen flex flex-col bg-slate-50">
+                    {/* Navigation - Compact for Mobile */}
+                    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 px-5 py-3 flex justify-between items-center border-b border-slate-100">
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={reset}>
+                            <div className="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-md">
+                                <i data-lucide="sparkles" className="w-4 h-4"></i>
+                            </div>
+                            <span className="text-lg font-extrabold tracking-tighter text-indigo-950">לומינה</span>
+                        </div>
+                        {userType && (
+                            <button onClick={reset} className="text-xs font-bold text-slate-400 border border-slate-100 px-3 py-1 rounded-full">יציאה</button>
+                        )}
+                    </nav>
+
+                    <main className="flex-1 pt-20 px-4 pb-8 max-w-md mx-auto w-full">
+                        {view === 'landing' && (
+                            <div className="flex flex-col items-center py-6 animate-fade-in">
+                                <div className="text-center mb-10">
+                                    <h1 className="text-4xl font-extrabold text-slate-900 mb-3 leading-tight">
+                                        החיוך שלך <br/>
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-l from-indigo-600 to-pink-500 font-black">מתחיל כאן.</span>
+                                    </h1>
+                                    <p className="text-slate-400 text-sm">בחרו את סוג הגישה שלכם</p>
+                                </div>
+                                <div className="flex flex-col gap-4 w-full">
+                                    <button onClick={() => {setUserType('patient'); setView('booking');}} className="bg-white p-6 rounded-[30px] shadow-sm hover:shadow-md transition-all text-right border border-slate-100 active:scale-95">
+                                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4"><i data-lucide="user" className="w-5 h-5"></i></div>
+                                        <h3 className="text-xl font-extrabold mb-1">תור חדש</h3>
+                                        <p className="text-slate-400 text-xs">קביעת טיפול מהירה</p>
+                                    </button>
+                                    <button onClick={() => {setUserType('dentist'); setView('dashboard');}} className="bg-slate-900 p-6 rounded-[30px] shadow-lg active:scale-95 transition-all text-right">
+                                        <div className="w-10 h-10 bg-white/10 text-indigo-400 rounded-xl flex items-center justify-center mb-4"><i data-lucide="stethoscope" className="w-5 h-5"></i></div>
+                                        <h3 className="text-xl font-extrabold text-white mb-1">כניסת צוות</h3>
+                                        <p className="text-slate-500 text-xs">ניהול יומן ומטופלים</p>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {view === 'booking' && (
+                            <div className="animate-fade-in">
+                                {step < 5 && (
+                                    <div className="flex justify-center gap-2 mb-8">
+                                        {[1,2,3,4].map(s => (
+                                            <div key={s} className={`h-1 rounded-full transition-all ${step >= s ? 'w-8 bg-indigo-600' : 'w-4 bg-slate-200'}`} />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {step === 1 && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {DENTISTS.map(d => (
+                                            <button key={d.id} onClick={()=>{setBooking({...booking, dentist: d}); setStep(2);}} className="bg-white p-2 rounded-[24px] shadow-sm active:scale-95 border border-slate-100 transition-all">
+                                                <img src={d.photo} className="w-full aspect-square object-cover rounded-[20px] mb-3" />
+                                                <h4 className="font-bold text-sm text-slate-800">{d.name.split(' ').slice(1).join(' ')}</h4>
+                                                <p className="text-[10px] text-indigo-500 font-bold uppercase">{d.role}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {step === 2 && (
+                                    <div className="space-y-3">
+                                        {TREATMENTS.map(t => (
+                                            <button key={t.id} onClick={()=>{setBooking({...booking, treatment: t}); setStep(3);}} className="w-full bg-white p-4 rounded-[20px] flex justify-between items-center active:bg-indigo-50 border border-slate-100 transition-all">
+                                                <div className="flex items-center gap-3 text-right">
+                                                    <div className={`w-10 h-10 ${t.color} rounded-lg shrink-0`}></div>
+                                                    <div>
+                                                        <h4 className="font-bold text-sm">{t.name}</h4>
+                                                        <p className="text-[10px] text-slate-400">{t.duration} דקות</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-base font-black text-indigo-600">{t.price}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {step === 3 && (
+                                    <div className="bg-white p-6 rounded-[30px] shadow-sm border border-slate-100 text-right">
+                                        <h4 className="font-bold text-xs text-indigo-600 mb-4 uppercase tracking-wider">בחירת מועד</h4>
+                                        <input type="date" className="text-2xl font-black mb-6 block w-full outline-none bg-transparent border-b border-slate-100 pb-2" onChange={(e)=>setBooking({...booking, date: e.target.value})} />
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {TIME_SLOTS.map(t => (
+                                                <button key={t} onClick={()=>setBooking({...booking, time: t})} className={`py-3 rounded-xl text-sm font-bold transition-all ${booking.time === t ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-50 text-slate-600'}`}>{t}</button>
+                                            ))}
+                                        </div>
+                                        {booking.time && <button onClick={()=>setStep(4)} className="w-full mt-8 py-4 bg-indigo-600 text-white rounded-xl font-bold active:scale-95 transition-all">המשך</button>}
+                                    </div>
+                                )}
+
+                                {step === 4 && (
+                                    <div className="bg-white p-6 rounded-[30px] shadow-sm border border-slate-100 text-right">
+                                        <h4 className="font-bold text-xs text-indigo-600 mb-6 uppercase tracking-wider text-center">פרטים אישיים</h4>
+                                        <input type="text" placeholder="שם מלא" className="w-full p-4 bg-slate-50 rounded-xl mb-3 outline-none font-bold text-sm" onChange={(e)=>setBooking({...booking, patientName: e.target.value})} />
+                                        <input type="tel" placeholder="מספר טלפון" className="w-full p-4 bg-slate-50 rounded-xl mb-6 outline-none font-bold text-sm" onChange={(e)=>setBooking({...booking, patientPhone: e.target.value})} />
+                                        
+                                        <div className="p-4 bg-slate-900 rounded-2xl text-white mb-6">
+                                            <div className="flex justify-between text-xs font-bold mb-2">
+                                                <span className="text-slate-400">טיפול:</span>
+                                                <span>{booking.treatment?.name}</span>
+                                            </div>
+                                            <div className="flex justify-between text-xs font-bold">
+                                                <span className="text-slate-400">זמן:</span>
+                                                <span>{booking.date} | {booking.time}</span>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={handleComplete} className="w-full py-4 bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded-xl font-black text-base shadow-lg active:scale-95 transition-all">קביעת תור</button>
+                                    </div>
+                                )}
+
+                                {step === 5 && (
+                                    <div className="text-center py-10">
+                                        <div className="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg rotate-6"><i data-lucide="check" size={32}></i></div>
+                                        <h2 className="text-3xl font-black mb-2">בוצע!</h2>
+                                        <p className="text-slate-400 text-sm mb-8 px-6">התור שלך נקבע בהצלחה. הודעת אישור נשלחה לנייד.</p>
+                                        <button onClick={reset} className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold">סגור וחזור</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {view === 'dashboard' && (
+                            <div className="animate-fade-in">
+                                <div className="flex justify-between items-center mb-6 px-1">
+                                    <h2 className="text-2xl font-black text-slate-900">יומן יומי</h2>
+                                    <div className="text-[10px] bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-bold uppercase tracking-wider">{new Date().toLocaleDateString('he-IL')}</div>
+                                </div>
+                                <div className="space-y-3">
+                                    {appointments.map(app => (
+                                        <div key={app.id} className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border-r-4 border-r-indigo-500">
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-xl font-black text-slate-800">{app.time}</span>
+                                                <div>
+                                                    <h4 className="font-bold text-sm">{app.patientName}</h4>
+                                                    <p className="text-[10px] text-slate-400">{TREATMENTS.find(t=>t.id===app.treatmentId)?.name || 'ייעוץ'}</p>
+                                                </div>
+                                            </div>
+                                            <button className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 active:bg-indigo-600 active:text-white transition-all">
+                                                <i data-lucide="phone" className="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    {appointments.length === 0 && (
+                                        <p className="text-center text-slate-300 text-sm italic py-10">אין תורים נוספים להיום</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
