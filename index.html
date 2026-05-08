@@ -18,8 +18,6 @@
         }
         .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        /* Mobile height fix */
-        .min-h-screen-ios { min-height: -webkit-fill-available; }
     </style>
 </head>
 <body>
@@ -29,13 +27,48 @@
         const { useState, useEffect } = React;
         
         const DENTISTS = [
-            { id: 'd1', name: 'ד"ר שרה וילסון', role: 'מנתחת בכירה', photo: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?auto=format&fit=crop&q=80&w=200&h=260' },
-            { id: 'd2', name: 'ד"ר יעקב מילר', role: 'אורתודונטיה', photo: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200&h=260' },
-            { id: 'd3', name: 'ד"ר אלנה רודריגז', role: 'רפואת ילדים', photo: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=200&h=260' },
+            { 
+                id: 'd1', 
+                name: 'ד"ר מרק לוין', 
+                role: 'רופא שיניים - כירורגיה', 
+                photo: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
+            { 
+                id: 'd2', 
+                name: 'ד"ר מיכל כהן', 
+                role: 'רופאת שיניים - אורתודונטית', 
+                photo: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
+            { 
+                id: 'd3', 
+                name: 'ד"ר דניאל לוי', 
+                role: 'רופא שיניים - אסתטיקה', 
+                photo: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
+            { 
+                id: 'd4', 
+                name: 'ד"ר עדי רוזן', 
+                role: 'רופאת שיניים לילדים', 
+                photo: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
+            { 
+                id: 'h1', 
+                name: 'מיטל גבאי', 
+                role: 'שיננית מוסמכת', 
+                // Image of a professional female hygienist
+                photo: 'https://images.unsplash.com/photo-1590611380053-da6447011f45?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
+            { 
+                id: 'h2', 
+                name: 'נועה תשבי', 
+                role: 'שיננית מוסמכת', 
+                // Image of a professional female medical assistant/hygienist
+                photo: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=400&h=500&auto=format&fit=crop' 
+            },
         ];
 
         const TREATMENTS = [
-            { id: 't1', name: 'ניקוי עמוק', type: 'מניעתי', duration: 45, price: '₪450', color: 'bg-cyan-500' },
+            { id: 't1', name: 'ניקוי עמוק / שיננית', type: 'מניעתי', duration: 45, price: '₪450', color: 'bg-cyan-500' },
             { id: 't2', name: 'שחזור חרסינה', type: 'משקם', duration: 60, price: '₪1,200', color: 'bg-purple-500' },
             { id: 't3', name: 'עזרה ראשונה', type: 'חירום', duration: 30, price: '₪350', color: 'bg-rose-500' },
             { id: 't4', name: 'הלבנת שיניים', type: 'אסתטי', duration: 90, price: '₪1,800', color: 'bg-amber-500' },
@@ -74,7 +107,6 @@
 
             return (
                 <div className="min-h-screen flex flex-col bg-slate-50">
-                    {/* Navigation - Compact for Mobile */}
                     <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 px-5 py-3 flex justify-between items-center border-b border-slate-100">
                         <div className="flex items-center gap-2 cursor-pointer" onClick={reset}>
                             <div className="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-md">
@@ -87,7 +119,7 @@
                         )}
                     </nav>
 
-                    <main className="flex-1 pt-20 px-4 pb-8 max-w-md mx-auto w-full">
+                    <main className="flex-1 pt-20 px-4 pb-8 max-w-md mx-auto w-full text-right">
                         {view === 'landing' && (
                             <div className="flex flex-col items-center py-6 animate-fade-in">
                                 <div className="text-center mb-10">
@@ -125,10 +157,19 @@
                                 {step === 1 && (
                                     <div className="grid grid-cols-2 gap-3">
                                         {DENTISTS.map(d => (
-                                            <button key={d.id} onClick={()=>{setBooking({...booking, dentist: d}); setStep(2);}} className="bg-white p-2 rounded-[24px] shadow-sm active:scale-95 border border-slate-100 transition-all">
-                                                <img src={d.photo} className="w-full aspect-square object-cover rounded-[20px] mb-3" />
-                                                <h4 className="font-bold text-sm text-slate-800">{d.name.split(' ').slice(1).join(' ')}</h4>
-                                                <p className="text-[10px] text-indigo-500 font-bold uppercase">{d.role}</p>
+                                            <button key={d.id} onClick={()=>{setBooking({...booking, dentist: d}); setStep(2);}} className="bg-white p-2 rounded-[24px] shadow-sm active:scale-95 border border-slate-100 transition-all flex flex-col items-center text-center">
+                                                <div className="w-full aspect-[4/5] mb-3 overflow-hidden rounded-[20px] bg-slate-100">
+                                                    <img 
+                                                        src={d.photo} 
+                                                        alt={d.name} 
+                                                        className="w-full h-full object-cover" 
+                                                        onError={(e) => {
+                                                            e.target.src = 'https://via.placeholder.com/400x500?text=Staff+Photo';
+                                                        }}
+                                                    />
+                                                </div>
+                                                <h4 className="font-bold text-sm text-slate-800 leading-tight mb-1">{d.name}</h4>
+                                                <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-tighter">{d.role}</p>
                                             </button>
                                         ))}
                                     </div>
@@ -175,6 +216,10 @@
                                                 <span className="text-slate-400">טיפול:</span>
                                                 <span>{booking.treatment?.name}</span>
                                             </div>
+                                            <div className="flex justify-between text-xs font-bold mb-2">
+                                                <span className="text-slate-400">מטפל/ת:</span>
+                                                <span>{booking.dentist?.name}</span>
+                                            </div>
                                             <div className="flex justify-between text-xs font-bold">
                                                 <span className="text-slate-400">זמן:</span>
                                                 <span>{booking.date} | {booking.time}</span>
@@ -189,7 +234,7 @@
                                     <div className="text-center py-10">
                                         <div className="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg rotate-6"><i data-lucide="check" size={32}></i></div>
                                         <h2 className="text-3xl font-black mb-2">בוצע!</h2>
-                                        <p className="text-slate-400 text-sm mb-8 px-6">התור שלך נקבע בהצלחה. הודעת אישור נשלחה לנייד.</p>
+                                        <p className="text-slate-400 text-sm mb-8 px-6">התור שלך נקבע בהצלחה עם {booking.dentist?.name}. הודעת אישור נשלחה לנייד.</p>
                                         <button onClick={reset} className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold">סגור וחזור</button>
                                     </div>
                                 )}
@@ -207,7 +252,7 @@
                                         <div key={app.id} className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border-r-4 border-r-indigo-500">
                                             <div className="flex items-center gap-4">
                                                 <span className="text-xl font-black text-slate-800">{app.time}</span>
-                                                <div>
+                                                <div className="text-right">
                                                     <h4 className="font-bold text-sm">{app.patientName}</h4>
                                                     <p className="text-[10px] text-slate-400">{TREATMENTS.find(t=>t.id===app.treatmentId)?.name || 'ייעוץ'}</p>
                                                 </div>
